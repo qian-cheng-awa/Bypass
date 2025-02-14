@@ -39,11 +39,13 @@ local Dropdown = Tab:CreateDropdown({
     end,
 })
 
-workspace:WaitForChild("RuntimeItems").ChildAdded:Connect(function()
-    Dropdown:Refresh(updataitem())
-end)
-workspace:WaitForChild("RuntimeItems").ChildRemoved:Connect(function()
-    Dropdown:Refresh(updataitem())
+workspace:WaitForChild("RuntimeItems").DescendantAdded:Connect(function(obj)
+    if obj:FindFirstChild("ObjectInfo",true) then
+        Dropdown:Refresh(updataitem())
+        obj.Destroying:Connect(function()
+            Dropdown:Refresh(updataitem())
+        end)
+    end
 end)
 
 local Button = Tab:CreateButton({
