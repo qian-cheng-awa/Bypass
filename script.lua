@@ -33,20 +33,16 @@ local Dropdown = Tab:CreateDropdown({
     MultipleOptions = false,
     Flag = "",
     Callback = function(Options)
-        -- The function that takes place when the selected option is changed
-        -- The variable (Options) is a table of strings for the current selected options
         item = items[unpack(Options)]
     end,
 })
 
-workspace:WaitForChild("RuntimeItems").DescendantAdded:Connect(function(obj)
-    if obj:FindFirstChild("ObjectInfo",true) then
+local Button = Tab:CreateButton({
+    Name = "刷新物品列表",
+    Callback = function()
         Dropdown:Refresh(updataitem())
-        obj.Destroying:Connect(function()
-            Dropdown:Refresh(updataitem())
-        end)
-    end
-end)
+    end,
+})
 
 local Button = Tab:CreateButton({
     Name = "传送物品到玩家位置",
@@ -69,6 +65,57 @@ local Button = Tab:CreateButton({
         game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("Remotes"):WaitForChild("Weld"):WaitForChild("RequestWeld"):FireServer(item,workspace:WaitForChild("Train"):WaitForChild("Platform"):WaitForChild("Part"))
     end,
 })
+
+
+local v = false
+
+local Toggle = Tab:CreateToggle({
+    Name = "物品透视",
+    CurrentValue = false,
+    Flag = "Toggle1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+    Callback = function(Value)
+        v = Value
+    end,
+})
+
+
+game:GetService("RunService").RenderStepped:Connect(function()
+    if v then
+        for i,itemi in ipairs(workspace:GetDescendants()) do
+            if itemi:FindFirstChild("ObjectInfo") then
+                if not itemi:GetAttribute("ESP") then
+                    itemi:SetAttribute("ESP",true)
+                    local bill = Instance.new("BillboardGui")
+                    bill.Name = "Espui"
+                    bill.Parent = itemi
+                    bill.Adornee = itemi
+                    bill.Size = UDim2.new(10,0,5,0)
+                    bill.AlwaysOnTop = true
+                    local textlabel = Instance.new("TextLabel")
+                    textlabel.Parent = bill
+                    textlabel.Size = UDim2.new(1,0,1,0)
+                    textlabel.BackgroundTransparency = 1
+                    textlabel.Text = itemi.Name
+                    textlabel.TextColor3 = Color3.new(1,1,1)
+                    textlabel.TextScaled = true
+                    local stk = Instance.new("UIStroke")
+                    stk.Parent = textlabel
+                    stk.Thickness = 2
+                    stk.LineJoinMode = Enum.LineJoinMode.Miter
+                end
+            end
+        end
+    else
+        for i,itemi in ipairs(workspace:GetDescendants()) do
+            if itemi:FindFirstChild("ObjectInfo") then
+                if itemi:GetAttribute("ESP") then
+                    itemi:SetAttribute("ESP",false)
+                    itemi:FindFirstChild("Espui"):Destroy()
+                end
+            end
+        end
+    end
+end)})
 
 
 local v = false
